@@ -13,6 +13,7 @@ import lk.ijse.dep.web.entity.Order;
 import lk.ijse.dep.web.entity.OrderDetail;
 import org.hibernate.Session;
 
+import javax.persistence.EntityManager;
 import java.sql.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,7 +24,9 @@ public class OrderBOImpl implements OrderBO {
     private OrderDetailDAO orderDetailDAO;
     private ItemDAO itemDAO;
     private CustomerDAO customerDAO;
-    private Session session;
+//    private Session session;
+
+    private EntityManager entityManager;
 
     public OrderBOImpl() {
         orderDAO = DAOFactory.getInstance().getDAO(DAOTypes.ORDER);
@@ -33,18 +36,19 @@ public class OrderBOImpl implements OrderBO {
     }
 
     @Override
-    public void setSession(Session session) throws Exception {
-        this.session = session;
-        orderDAO.setSession(session);
-        itemDAO.setSession(session);
-        orderDAO.setSession(session);
-        orderDetailDAO.setSession(session);
-        customerDAO.setSession(session);
+    public void setEntityManager(EntityManager entityManager) throws Exception {
+        this.entityManager = entityManager;
+        orderDAO.setEntityManager(entityManager);
+        itemDAO.setEntityManager(entityManager);
+        orderDAO.setEntityManager(entityManager);
+        orderDetailDAO.setEntityManager(entityManager);
+        customerDAO.setEntityManager(entityManager);
     }
 
     @Override
     public void placeOrder(OrderDTO dto) throws Exception {
-        session.beginTransaction();
+//        session.beginTransaction();
+        entityManager.getTransaction().begin();
         try {
             boolean result = false;
 
@@ -68,10 +72,12 @@ public class OrderBOImpl implements OrderBO {
 
             }
 
-            session.getTransaction().commit();
+//            session.getTransaction().commit();
+            entityManager.getTransaction().commit();
 
         } catch (Throwable t) {
-            session.getTransaction().rollback();
+//            session.getTransaction().rollback();
+            entityManager.getTransaction().rollback();
             throw t;
         }
     }

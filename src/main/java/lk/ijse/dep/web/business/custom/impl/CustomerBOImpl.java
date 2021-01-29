@@ -8,51 +8,67 @@ import lk.ijse.dep.web.dto.CustomerDTO;
 import lk.ijse.dep.web.entity.Customer;
 import org.hibernate.Session;
 
+import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class CustomerBOImpl implements CustomerBO {
 
     private CustomerDAO customerDAO;
-    private Session session;
+    private EntityManager entityManager;
 
     public CustomerBOImpl() {
         customerDAO = DAOFactory.getInstance().getDAO(DAOTypes.CUSTOMER);
     }
 
     @Override
-    public void setSession(Session session) throws Exception {
-        this.session = session;
-        customerDAO.setSession(session);
+    public void setEntityManager(EntityManager entityManager) throws Exception {
+        this.entityManager = entityManager;
+//        customerDAO.setSession(entityManager);
+        customerDAO.setEntityManager(entityManager);
     }
 
     @Override
     public void saveCustomer(CustomerDTO dto) throws Exception {
-        session.beginTransaction();
+//        session.beginTransaction();
+        entityManager.getTransaction().begin();
+
+
         customerDAO.save(new Customer(dto.getId(), dto.getName(), dto.getAddress()));
-        session.getTransaction().commit();
+
+        entityManager.getTransaction().commit();
+
+//        session.getTransaction().commit();
     }
 
     @Override
     public void updateCustomer(CustomerDTO dto) throws Exception {
-        session.beginTransaction();
+//        session.beginTransaction();
+        entityManager.getTransaction().begin();
         customerDAO.update(new Customer(dto.getId(), dto.getName(), dto.getAddress()));
-        session.getTransaction().commit();
+        entityManager.getTransaction().commit();
+//        session.getTransaction().commit();
     }
 
     @Override
     public void deleteCustomer(String customerId) throws Exception {
-        session.beginTransaction();
+//        session.beginTransaction();
+        entityManager.getTransaction().begin();
         customerDAO.delete(customerId);
-        session.getTransaction().commit();
+        entityManager.getTransaction().commit();
+//        session.getTransaction().commit();
     }
 
     @Override
     public List<CustomerDTO> findAllCustomers() throws Exception {
-        session.beginTransaction();
+//        session.beginTransaction();
+        entityManager.getTransaction().begin();
         List<CustomerDTO> collect = customerDAO.getAll().stream().
                 map(c -> new CustomerDTO(c.getId(), c.getName(), c.getAddress())).collect(Collectors.toList());
-        session.getTransaction().commit();
+//        session.getTransaction().commit();
+        entityManager.getTransaction().commit();
         return collect;
     }
+
+
 }

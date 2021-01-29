@@ -4,6 +4,8 @@ import lk.ijse.dep.web.util.HibernateUtil;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.slf4j.LoggerFactory;
 
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
@@ -28,25 +30,12 @@ public class ContextListener implements ServletContextListener {
         Properties prop = new Properties();
         try {
             logger.info("Session factory is being initialized");
-            sce.getServletContext().setAttribute("sf", HibernateUtil.getSessionFactory());
+            EntityManagerFactory emf;
+            prop.load(ContextListener.class.getResourceAsStream("/application.properties"));
+            emf = Persistence.createEntityManagerFactory("dep-6",prop);
+            System.out.println(emf);
+            sce.getServletContext().setAttribute("emf",emf);
 
-//            Properties properties = System.getProperties();
-//            for (Object o : properties.keySet()) {
-//                System.out.println(o);
-//            }
-
-//            System.out.println(System.getProperty("catalina.home"));
-
-            String logFilePath;
-            if (prop.getProperty("app.log_dir")!= null){
-                logFilePath = prop.getProperty("app.log_dir") + "/back-end.log";
-            }else{
-                logFilePath = System.getProperty("catalina.home") + "/logs/back-end.log";
-            }
-            FileHandler fileHandler = new FileHandler(logFilePath, true);
-            fileHandler.setFormatter(new SimpleFormatter());
-            fileHandler.setLevel(Level.INFO);
-            Logger.getLogger("").addHandler(fileHandler);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -54,7 +43,9 @@ public class ContextListener implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        HibernateUtil.getSessionFactory().close();
+//        HibernateUtil.getSessionFactory().close();
+        EntityManagerFactory emf = (EntityManagerFactory) sce.getServletContext().getAttribute("emf");
+        emf.close();
         logger.info("Session factory is being shut down");
     }
 }

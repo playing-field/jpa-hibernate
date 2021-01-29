@@ -4,30 +4,38 @@ import lk.ijse.dep.web.dao.custom.QueryDAO;
 import lk.ijse.dep.web.entity.CustomEntity;
 import org.hibernate.Session;
 
+import javax.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.sql.Date;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
 public class QueryDAOImpl implements QueryDAO {
 
-    private Session session;
+//    private Session session;
+
+    private EntityManager entityManager;
+
+//    @Override
+//    public void setSession(Session session) throws Exception {
+//        this.session = session;
+//    }
 
     @Override
-    public void setSession(Session session) throws Exception {
-        this.session = session;
+    public void setEntityManager(EntityManager entityManager) throws Exception {
+        this.entityManager = entityManager;
     }
+
 
     @Override
     public List<CustomEntity> getOrderInfo(String customerId) throws Exception {
 
-        List<Object[]> rows = session.createNativeQuery("SELECT c.id AS customer_id, c.name AS customer_name, o.id AS order_id, o.date AS order_date,\n" +
+        List<Object[]> rows = entityManager.createNativeQuery("SELECT c.id AS customer_id, c.name AS customer_name, o.id AS order_id, o.date AS order_date,\n" +
                 "       SUM(od.qty * od.unit_price) as order_detail\n" +
                 "FROM customer c\n" +
                 "INNER JOIN `order` o on c.id = o.customer_id\n" +
                 "INNER JOIN order_detail od on o.id = od.order_id\n" +
-                "WHERE c.id=? GROUP BY o.id;").list();
+                "WHERE c.id=? GROUP BY o.id;").getResultList();
 
         List<CustomEntity> orders = new ArrayList<>();
         for (Object[] row : rows) {
@@ -56,4 +64,6 @@ public class QueryDAOImpl implements QueryDAO {
 //        }
 //        return orders;
     }
+
+
 }

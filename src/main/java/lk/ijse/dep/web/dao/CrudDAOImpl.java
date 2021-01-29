@@ -1,53 +1,62 @@
 package lk.ijse.dep.web.dao;
 
 import lk.ijse.dep.web.entity.SuperEntity;
-import org.hibernate.Session;
 
+import javax.persistence.EntityManager;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
 
 public class CrudDAOImpl<T extends SuperEntity, K extends Serializable> implements CrudDAO<T, K> {
+    //    private Session session;
 
-    private Session session;
+    private EntityManager entityManger;
     private Class<T> entityClass;
 
     public CrudDAOImpl() {
         entityClass = (Class<T>) (((ParameterizedType) (this.getClass().getGenericSuperclass())).getActualTypeArguments()[0]);
     }
 
-    protected Session getSession() {
-        return this.session;
+//    protected Session getSession() {
+//        return this.session;
+
+    protected EntityManager getEntityManager() {
+        return this.entityManger;
     }
 
+    //    }
     @Override
-    public void setSession(Session session) throws Exception {
-        this.session = session;
+    public void setEntityManager(EntityManager entityManager) throws Exception {
+        this.entityManger = entityManager;
     }
+//    @Override
+
+//    public void setSession(Session session) throws Exception {
+//        this.session = session;
+//    }
 
     @Override
     public void save(T entity) throws Exception {
-        session.save(entity);
+        entityManger.persist(entity);
     }
 
     @Override
     public void update(T entity) throws Exception {
-        session.update(entity);
+        entityManger.merge(entity);
     }
 
     @Override
     public void delete(K key) throws Exception {
-        session.delete(session.load(entityClass, key));
+        entityManger.remove(entityManger.getReference(entityClass, key));
     }
 
     @Override
     public List<T> getAll() throws Exception {
-        return session.createQuery("FROM " + entityClass.getName()).list();
+        return entityManger.createQuery("FROM " + entityClass.getName()).getResultList();
     }
 
     @Override
     public T get(K key) throws Exception {
-        return session.get(entityClass, key);
+        return entityManger.find(entityClass, key);
     }
-
 }
